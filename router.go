@@ -42,6 +42,20 @@ func router() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Method("GET", "/", Handler(Index))
 
+		r.Method("POST", "/surveys", Handler(HandleCreateSurvey))
+
+		//indicator
+		r.Method("POST", "/indicators", Handler(HandleCreateIndicator))
+
+		// question
+		r.Method("POST", "/questions", Handler(HandleCreateQuestion))
+
+		//survey journals
+		r.Method("POST", "/survey/journals", Handler(HandleCreateSurveyJournal))
+
+		//user
+		r.Method("POST", "/users", Handler(HandleCreateUser))
+
 	})
 
 	//public folder for assets
