@@ -25,3 +25,16 @@ func (q *User) CreateUser(db *gorm.DB) (*User, error) {
 	}
 	return q, nil
 }
+
+func Exe(db *gorm.DB, survey_id string) []map[string]interface{} {
+
+	var r []map[string]interface{}
+	sql := `select i.name as indicator,sum(i.weight) as total_weight, sum(a.answer_point) as total_indicator
+	 from survey_journals as a
+	 inner join questions as q on a.question_id=q.id
+	 inner join indicators as i on i.id=q.indicator_id
+	 where a.survey_id=?
+	 group by i.name`
+	db.Debug().Raw(sql, survey_id).Limit(100).Find(&r)
+	return r
+}
