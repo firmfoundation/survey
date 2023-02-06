@@ -20,9 +20,29 @@ type SurveyJournal struct {
 	UpdatedAt   time.Time
 }
 
+type SurveyResult struct {
+	SurveyID uuid.UUID `json:"survey_id"`
+	UserID   uuid.UUID `json:"user_id"`
+	Result   []Result  `json:"result"`
+}
+
+type Result struct {
+	QuestionID uuid.UUID `json:"question_id"`
+	Answer     int       `json:"answer"`
+}
+
 func (q *SurveyJournal) CreateSurveyJournal(db *gorm.DB) (*SurveyJournal, error) {
 	var err error
 	err = db.Debug().Create(&q).Error
+	if err != nil {
+		return &SurveyJournal{}, err
+	}
+	return q, nil
+}
+
+func (q *SurveyJournal) CreateSurveyResult(db *gorm.DB, batch []SurveyJournal) (*SurveyJournal, error) {
+	var err error
+	err = db.Debug().Create(&batch).Error
 	if err != nil {
 		return &SurveyJournal{}, err
 	}

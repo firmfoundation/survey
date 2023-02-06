@@ -26,3 +26,13 @@ func (q *Question) CreateQuestion(db *gorm.DB) (*Question, error) {
 	}
 	return q, nil
 }
+
+func (q *Question) GetQuestionBySurveyID(db *gorm.DB, uid string) (*[]Question, error) {
+	var err error
+	questions := []Question{}
+	err = db.Preload("Indicator").Preload("Survey").Where("survey_id = ?", uid).Limit(100).Find(&questions).Error
+	if err != nil {
+		return &[]Question{}, err
+	}
+	return &questions, err
+}

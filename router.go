@@ -49,12 +49,17 @@ func router() http.Handler {
 
 		// question
 		r.Method("POST", "/questions", Handler(HandleCreateQuestion))
+		r.Method("GET", "/questions", Handler(HandleGetSurveyQuestion))
 
 		//survey journals
 		r.Method("POST", "/survey/journals", Handler(HandleCreateSurveyJournal))
+		r.Method("POST", "/survey/results", Handler(HandleSurveyResult))
 
 		//user
 		r.Method("POST", "/users", Handler(HandleCreateUser))
+
+		//execute
+		r.Method("GET", "/exe", Handler(HandleExe))
 
 	})
 

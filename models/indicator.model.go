@@ -12,6 +12,7 @@ type Indicator struct {
 	Name      string    `json:"name" gorm:"type:varchar(255);not null"`
 	SurveyID  uuid.UUID `json:"survey_id" gorm:"type:uuid;default:uuid_generate_v4();not null"`
 	Survey    Survey    `json:"survey"`
+	Weight    float64   `json:"weight"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
