@@ -48,3 +48,42 @@ func (q *SurveyJournal) CreateSurveyResult(db *gorm.DB, batch []SurveyJournal) (
 	}
 	return q, nil
 }
+
+func (q *SurveyJournal) GetAllSurveyJournalUsers(db *gorm.DB, survey_id string) []map[string]interface{} {
+	var r []map[string]interface{}
+	sql := `select a.survey_id as survey_id, s.name as survey_name, a.user_id as user_id, u.email, u.full_name, 
+	sum(i.weight) as total_weight, sum(a.answer_point) as total_indicator
+	from survey_journals as a
+	inner join questions as q on a.question_id=q.id
+	inner join indicators as i on i.id=q.indicator_id
+	inner join users as u on u.id=a.user_id
+	inner join surveys as s on s.id=a.survey_id
+	where a.survey_id=?
+	group by a.survey_id, s.name, a.user_id, u.email, u.full_name`
+	db.Debug().Raw(sql, survey_id).Limit(100).Find(&r)
+	return r
+}
+
+func GetUserSurveyIndicators(db *gorm.DB, survey_id string, user_id string) []map[string]interface{} {
+	var r []map[string]interface{}
+	sql := `select i.name as indicator,sum(i.weight) as total_weight, sum(a.answer_point) as total_indicator
+	 from survey_journals as a
+	 inner join questions as q on a.question_id=q.id
+	 inner join indicators as i on i.id=q.indicator_id
+	 where a.survey_id=? and a.user_id=?
+	 group by i.name`
+	db.Debug().Raw(sql, survey_id, user_id).Limit(100).Find(&r)
+	return r
+}
+
+/*
+func (q *SurveyJournal) GetAllSurveyJournalUsers(db *gorm.DB, survey_id string) (*[]SurveyJournal, error) {
+	var err error
+	surveyJournal := []SurveyJournal{}
+	err = db.Debug().Preload("User").Where("survey_id = ?", survey_id).Limit(100).Find(&surveyJournal).Error
+	if err != nil {
+		return &[]SurveyJournal{}, err
+	}
+	return &surveyJournal, err
+}
+*/

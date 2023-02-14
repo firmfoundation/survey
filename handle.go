@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"html/template"
 	"io/ioutil"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/firmfoundation/survey/initdb"
 	"github.com/firmfoundation/survey/models"
+	"github.com/firmfoundation/survey/util"
 )
 
 type Handler func(w http.ResponseWriter, r *http.Request) error
@@ -26,7 +28,7 @@ func Index(w http.ResponseWriter, r *http.Request) error {
 	exPath := filepath.Dir(ex)
 
 	if r.Method != http.MethodGet {
-		return CustomeError(nil, 405, "Error: Method not allowed.")
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
 	}
 
 	t, _ := template.ParseFiles(exPath + "/templates/index.html")
@@ -34,20 +36,37 @@ func Index(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+func IndexAdmin(w http.ResponseWriter, r *http.Request) error {
+	ex, err := os.Executable()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	exPath := filepath.Dir(ex)
+
+	if r.Method != http.MethodGet {
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
+	}
+
+	t, _ := template.ParseFiles(exPath + "/templates/admin.html")
+	t.Execute(w, "")
+	return nil
+}
+
 func HandleCreateSurvey(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
-		return CustomeError(nil, 405, "Error: Method not allowed.")
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
 	}
 
 	survey := &models.Survey{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(survey)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: parsing in one or more submitted body fields.")
+		return util.CustomeError(nil, 500, "Error: parsing in one or more submitted body fields.")
 	}
 	s, err := survey.SaveSurvey(initdb.DB)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: unable to save survey data.")
+		return util.CustomeError(nil, 500, "Error: unable to save survey data.")
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -59,23 +78,23 @@ func HandleCreateSurvey(w http.ResponseWriter, r *http.Request) error {
 
 func HandleCreateIndicator(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
-		return CustomeError(nil, 405, "Error: Method not allowed.")
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
+		return util.CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
 	}
 
 	indicator := &models.Indicator{}
 	err = json.Unmarshal(body, &indicator)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
+		return util.CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
 	}
 
 	result, err := indicator.CreateIndicator(initdb.DB)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: unable to create indicator data.")
+		return util.CustomeError(nil, 500, "Error: unable to create indicator data.")
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -86,23 +105,23 @@ func HandleCreateIndicator(w http.ResponseWriter, r *http.Request) error {
 
 func HandleCreateQuestion(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
-		return CustomeError(nil, 405, "Error: Method not allowed.")
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
+		return util.CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
 	}
 
 	question := &models.Question{}
 	err = json.Unmarshal(body, &question)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
+		return util.CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
 	}
 
 	result, err := question.CreateQuestion(initdb.DB)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: unable to create questionnaire data.")
+		return util.CustomeError(nil, 500, "Error: unable to create questionnaire data.")
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -113,23 +132,23 @@ func HandleCreateQuestion(w http.ResponseWriter, r *http.Request) error {
 
 func HandleCreateSurveyJournal(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
-		return CustomeError(nil, 405, "Error: Method not allowed.")
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
+		return util.CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
 	}
 
 	journal := &models.SurveyJournal{}
 	err = json.Unmarshal(body, &journal)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
+		return util.CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
 	}
 
 	result, err := journal.CreateSurveyJournal(initdb.DB)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: unable to create survey journal data.")
+		return util.CustomeError(nil, 500, "Error: unable to create survey journal data.")
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -140,23 +159,23 @@ func HandleCreateSurveyJournal(w http.ResponseWriter, r *http.Request) error {
 
 func HandleCreateUser(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
-		return CustomeError(nil, 405, "Error: Method not allowed.")
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
+		return util.CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
 	}
 
 	user := &models.User{}
 	err = json.Unmarshal(body, &user)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
+		return util.CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
 	}
 
 	result, err := user.CreateUser(initdb.DB)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: unable to create user data.")
+		return util.CustomeError(nil, 500, "Error: unable to create user data.")
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -167,14 +186,14 @@ func HandleCreateUser(w http.ResponseWriter, r *http.Request) error {
 
 func HandleGetSurveyQuestion(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodGet {
-		return CustomeError(nil, 405, "Error: Method not allowed.")
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
 	}
-
+	//survey_id := chi.URLParam(r, "uid")
 	survey_id := r.URL.Query().Get("survey_id")
 	question := &models.Question{}
 	result, err := question.GetQuestionBySurveyID(initdb.DB, survey_id)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: unable to Get question data.")
+		return util.CustomeError(nil, 500, "Error: unable to Get question data.")
 	}
 
 	w.WriteHeader(http.StatusAccepted)
@@ -185,12 +204,12 @@ func HandleGetSurveyQuestion(w http.ResponseWriter, r *http.Request) error {
 
 func HandleSurveyResult(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
-		return CustomeError(nil, 405, "Error: Method not allowed.")
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
+		return util.CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
 	}
 
 	survey := &models.SurveyJournal{}
@@ -198,7 +217,7 @@ func HandleSurveyResult(w http.ResponseWriter, r *http.Request) error {
 
 	err = json.Unmarshal(body, &survey_result)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
+		return util.CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
 	}
 
 	var batch []models.SurveyJournal
@@ -208,7 +227,7 @@ func HandleSurveyResult(w http.ResponseWriter, r *http.Request) error {
 
 	result, err := survey.CreateSurveyResult(initdb.DB, batch)
 	if err != nil {
-		return CustomeError(nil, 500, "Error: unable to create survey journal data.")
+		return util.CustomeError(nil, 500, "Error: unable to create survey journal data.")
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -217,24 +236,15 @@ func HandleSurveyResult(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func HandleExe(w http.ResponseWriter, r *http.Request) error {
+func HandleUserSurveyIndicators(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodGet {
-		return CustomeError(nil, 405, "Error: Method not allowed.")
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
 	}
 
 	survey_id := r.URL.Query().Get("survey_id")
-	// body, err := ioutil.ReadAll(r.Body)
-	// if err != nil {
-	// 	return CustomeError(nil, http.StatusUnprocessableEntity, "Error: parsing in one or more submitted body fields.")
-	// }
+	user_id := r.URL.Query().Get("user_id")
 
-	// user := &models.User{}
-	// err = json.Unmarshal(body, &user)
-	// if err != nil {
-	// 	return CustomeError(nil, 500, "Error: decoding in one or more submitted body fields.")
-	// }
-
-	result := models.Exe(initdb.DB, survey_id)
+	result := models.GetUserSurveyIndicators(initdb.DB, survey_id, user_id)
 
 	//Generate radar
 	if len(result) > 1 {
@@ -266,11 +276,66 @@ func HandleExe(w http.ResponseWriter, r *http.Request) error {
 			indicator_weight = append(indicator_weight, 100)
 		}
 		indicators_value = append(indicators_value, value)
-		GenRadarChart(survey_title, indicators, indicator_weight, indicators_value)
+		GenRadarChart(survey_title, indicators, indicator_weight, indicators_value, survey_id, user_id)
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+	return nil
+}
+
+func HandleUserSurveyIndicatorsRadarChart(w http.ResponseWriter, r *http.Request) error {
+	if r.Method != http.MethodGet {
+		return util.CustomeError(nil, 405, "Error: Method not allowed.")
+	}
+
+	survey_id := r.URL.Query().Get("survey_id")
+	user_id := r.URL.Query().Get("user_id")
+
+	result := models.GetUserSurveyIndicators(initdb.DB, survey_id, user_id)
+
+	//Generate radar chart
+	var survey_title = survey_id
+	var indicators []string
+	var value []float64
+	var indicators_value [][]float64
+	var indicator_weight []float64
+	if len(result) > 1 {
+
+		var t_w, t_i float64
+
+		for _, obj := range result {
+			if str, ok := obj["indicator"].(string); ok {
+				indicators = append(indicators, str)
+			}
+
+			if v, ok := obj["total_weight"].(float64); ok {
+				t_w = v
+			}
+
+			if v, ok := obj["total_indicator"].(float64); ok {
+				t_i = v
+			}
+
+			//percentage of indicator value
+			p := (t_i * 100) / t_w
+			value = append(value, p)
+
+			indicator_weight = append(indicator_weight, 100)
+		}
+		indicators_value = append(indicators_value, value)
+
+	}
+
+	img, err := GenGetRadarChart(survey_title, indicators, indicator_weight, indicators_value, survey_id, user_id)
+	if err != nil {
+		return util.CustomeError(nil, 500, "Error: unable to create radar chart.")
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/octet-stream")
+	sEnc := "data:image/png;base64," + base64.StdEncoding.EncodeToString(img)
+	w.Write([]byte(sEnc))
 	return nil
 }
