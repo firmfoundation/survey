@@ -36,3 +36,15 @@ func (q *Question) GetQuestionBySurveyID(db *gorm.DB, uid string) (*[]Question, 
 	}
 	return &questions, err
 }
+
+func (q *Question) GetAllUserSurveyIndicatorQuestions(db *gorm.DB, survey_id string, user_id string) []map[string]interface{} {
+	var r []map[string]interface{}
+	sql := `select u.id as user_id,u.email,q.question as question,i.weight as total_weight, a.answer_point as total_indicator
+			from survey_journals as a
+			inner join questions as q on a.question_id=q.id
+			inner join indicators as i on i.id=q.indicator_id
+			inner join users as u on u.id=a.user_id
+	 		where a.survey_id=? and a.user_id=?`
+	db.Debug().Raw(sql, survey_id, user_id).Limit(100).Find(&r)
+	return r
+}

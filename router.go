@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/firmfoundation/survey/handles"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
@@ -41,6 +42,7 @@ func router() http.Handler {
 
 	r.Group(func(r chi.Router) {
 		r.Method("GET", "/", Handler(Index))
+		r.Method("GET", "/admin", Handler(IndexAdmin))
 
 		r.Method("POST", "/surveys", Handler(HandleCreateSurvey))
 
@@ -54,13 +56,20 @@ func router() http.Handler {
 		//survey journals
 		r.Method("POST", "/survey/journals", Handler(HandleCreateSurveyJournal))
 		r.Method("POST", "/survey/results", Handler(HandleSurveyResult))
+		r.Method("GET", "/surveys", Handler(handles.GetAllSurveys))
+		r.Method("GET", "/surveys/users", Handler(handles.GetAllSurveyUsers))
 
 		//user
 		r.Method("POST", "/users", Handler(HandleCreateUser))
 
 		//execute
-		r.Method("GET", "/exe", Handler(HandleExe))
+		r.Method("GET", "/surveys/users/indicators", Handler(HandleUserSurveyIndicators))
 
+		r.Method("GET", "/surveys/users/indicators/radar-chart", Handler(HandleUserSurveyIndicatorsRadarChart))
+
+		r.Method("GET", "/surveys/users/indicators/questions", Handler(handles.GetUserSurveyIndicatorQuestions))
+
+		r.Method("GET", "/surveys/{uid}", Handler(Index))
 	})
 
 	//public folder for assets

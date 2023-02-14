@@ -23,3 +23,13 @@ func (s *Survey) SaveSurvey(db *gorm.DB) (*Survey, error) {
 	}
 	return s, nil
 }
+
+func (q *Survey) GetAllSurveys(db *gorm.DB) (*[]Survey, error) {
+	var err error
+	survey := []Survey{}
+	err = db.Debug().Limit(100).Find(&survey).Error
+	if err != nil {
+		return &[]Survey{}, err
+	}
+	return &survey, err
+}
