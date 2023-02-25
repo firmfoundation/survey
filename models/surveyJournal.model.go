@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,7 +23,8 @@ type SurveyJournal struct {
 
 type SurveyResult struct {
 	SurveyID uuid.UUID `json:"survey_id"`
-	UserID   uuid.UUID `json:"user_id"`
+	Email    string    `json:"email"`
+	FullName string    `json:"full_name"`
 	Result   []Result  `json:"result"`
 }
 
@@ -40,12 +42,59 @@ func (q *SurveyJournal) CreateSurveyJournal(db *gorm.DB) (*SurveyJournal, error)
 	return q, nil
 }
 
-func (q *SurveyJournal) CreateSurveyResult(db *gorm.DB, batch []SurveyJournal) (*SurveyJournal, error) {
-	var err error
-	err = db.Debug().Create(&batch).Error
+func (q *SurveyJournal) CreateSurveyResult(db *gorm.DB, batch []SurveyJournal, u *User) (*SurveyJournal, error) {
+
+	// err = db.Debug().Create(&batch).Error
+	// if err != nil {
+	// 	return &SurveyJournal{}, err
+	// }
+	// return q, nil
+	err := db.Transaction(func(tx *gorm.DB) error {
+		// do some database operations in the transaction (use 'tx' from this point, not 'db')
+		var err error
+
+		//tx 1 check if user exists
+		user := User{}
+		if err = tx.Where("email = ?", u.Email).First(&user).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+
+				if err = tx.Debug().Create(u).Error; err != nil {
+					return err
+				}
+
+				//update batch with the newly created userid
+				for i := range batch {
+					batch[i].UserID = u.ID
+				}
+				//reset user to empty
+				user.ID = uuid.Nil
+			} else {
+				return err
+			}
+
+		}
+
+		if user.ID.String() != uuid.Nil.String() {
+			//update batch with existing userid
+			for i := range batch {
+				batch[i].UserID = user.ID
+			}
+		}
+
+		//tx - 2
+		if err = tx.Debug().Create(&batch).Error; err != nil {
+			// return any error will rollback
+			return err
+		}
+
+		// return nil will commit the whole transaction
+		return nil
+	})
+
 	if err != nil {
 		return &SurveyJournal{}, err
 	}
+
 	return q, nil
 }
 

@@ -222,10 +222,11 @@ func HandleSurveyResult(w http.ResponseWriter, r *http.Request) error {
 
 	var batch []models.SurveyJournal
 	for _, b := range survey_result.Result {
-		batch = append(batch, models.SurveyJournal{QuestionID: b.QuestionID, SurveyID: survey_result.SurveyID, AnswerPoint: b.Answer, UserID: survey_result.UserID})
+		batch = append(batch, models.SurveyJournal{QuestionID: b.QuestionID, SurveyID: survey_result.SurveyID, AnswerPoint: b.Answer})
 	}
 
-	result, err := survey.CreateSurveyResult(initdb.DB, batch)
+	user := &models.User{Email: survey_result.Email, FullName: survey_result.FullName}
+	result, err := survey.CreateSurveyResult(initdb.DB, batch, user)
 	if err != nil {
 		return util.CustomeError(nil, 500, "Error: unable to create survey journal data.")
 	}

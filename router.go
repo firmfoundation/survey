@@ -48,6 +48,7 @@ func router() http.Handler {
 
 		//indicator
 		r.Method("POST", "/indicators", Handler(HandleCreateIndicator))
+		r.Method("GET", "/indicators", Handler(handles.GetAllIndicators))
 
 		// question
 		r.Method("POST", "/questions", Handler(HandleCreateQuestion))
@@ -73,8 +74,8 @@ func router() http.Handler {
 	})
 
 	//public folder for assets
-	fs := http.FileServer(http.Dir(servicePath() + "/static/img"))
-	r.Handle("/static/img/*", http.StripPrefix("/static/img/", fs))
+	fs := http.FileServer(http.Dir(servicePath() + "/static"))
+	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
 	return r
 }

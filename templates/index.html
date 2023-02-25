@@ -19,7 +19,7 @@
         .cs-1 {
             background: #80ffdb;
             padding: 30px;
-            margin: 20px;
+            margin: 5px;
             border-style: solid;
             border-width: 1px;
             border-color: #80ffdb;
@@ -35,6 +35,28 @@
             border-color: #ffffff;
             border-radius: 5px;
             max-width: 38rem;
+        }
+        .cs-3 {
+            background: #f8f9fa;
+            padding: 30px;
+            margin: 5px;
+            border-style: solid;
+            border-width: 1px;
+            border-color: #f8f9fa;
+            border-radius: 5px;
+            max-width: 48rem;
+            box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+        }
+        .cs-4 {
+            background: #f8f9fa;
+            padding: 30px;
+            margin: 5px;
+            border-style: solid;
+            border-width: 1px;
+            border-color: #f8f9fa;
+            border-radius: 5px;
+            max-width: 48rem;
+            box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
         }
         .speech-bubble {
             position: relative;
@@ -57,8 +79,8 @@
         }
         .q-1 {
             background: #e9ecef;
-            padding: 30px;
-            margin: 20px;
+            padding: 15px;
+            margin: 10px;
             border-style: solid;
             border-width: 1px;
             border-color: #ffffff;
@@ -71,20 +93,44 @@
     <body>
         <nav class="navbar bg-body-tertiary">
             <div class="container">
-                <img src="static/img/survey-owel.png" alt="QR code generator" width="30" class="rounded">
-                Survey management system - v1.0.0
+                <img src="/static/img/survey-owel.png" alt="survey owel" width="60" class="rounded">
+                survey owel - v1.0.0
             </div>
         </nav>
 
 
         <div class="container-sm ">
+            <!-- user  -->
             <div class="row  was-validated justify-content-center">
-                <div class="col cs-1 ">
-                    <!-- question   -->
-                    <div class="m-3 mx-sm-auto" id="question-board"></div>
-               
+        
+                <div class="col cs-3 ">
 
-                    <div class="text-end mt-3">
+                    <h5 class="card-title">Hi </h5>
+                    <p class="card-text">Please take a moment to tell us how we're doing in this brief survey !
+                    </p>
+
+                    <div class="form-floating mb-3 w-50 was-validated">
+                        <input type="text" class="form-control form-control-sm" id="txt-e" value="" size="10" required>
+                        <label for="txt-e" class="form-label">Email</label>
+                        <div class="invalid-feedback">Email is required. </div>
+                    </div>
+
+                    <div class="form-floating mb-3 w-50 was-validated ">
+                        <input type="text" class="form-control" id="txt-n" value="" size="10" required>
+                        <label for="txt-n" class="form-label">Full Name</label>
+                        <div class="invalid-feedback">Full Name required. </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- question   -->
+            <div class="row  was-validated justify-content-center">
+                <div class="col cs-4 ">
+                   
+                    <div class="m-3 mx-sm-auto" id="question-board"></div>
+    
+                    <div class="text-center mt-3">
                         <button type="button" id="btn-send" class="btn btn-primary">Submit</button>
                     </div>
 
@@ -93,7 +139,7 @@
         </div>
 
         <div class="container-sm ">
-            <div class="row text-center text-dark">
+            <div class="survey-uid row text-center text-dark">
               <h5>survey ID :  a03edfe0-93b5-4b82-9480-593188aacda4  </h5>
             </div>
         </div>
@@ -101,9 +147,9 @@
         <!-- Footer -->
         <footer class="fixed-bottom">
             <!-- Copyright -->
-            <div class="text-center pt-2" style="background-color: rgba(0, 0, 0, 0.05); height: 40px;">
-                survey management system - version 1.0.0  
-                <img src="static/img/bashanka.png" alt="QR code generator" width="20" class="rounded">
+            <div class="text-center pt-2" style="background-color: rgba(0, 0, 0, 0.05); height: 50px;">
+                Survey Owel - version 1.0.0  
+                <img src="/static/img/survey-owel.png" alt="Survey Owel" width="40" class="rounded">
             </div>
             <!-- Copyright -->
         </footer>
@@ -122,6 +168,8 @@
                a = p.split("/")
                if (a.length == 3 && a[1]=="surveys"){
                   surveyId = a[2]
+                  $('.survey-uid').empty()
+                  $('.survey-uid').append(`<h5>survey ID :  ${surveyId}  </h5>`);
                   return surveyId
                }
                return ""
@@ -165,7 +213,8 @@
                     }
                      var payload = {
                         survey_id: surveyId,
-                        user_id: "0bdbadff-ed8b-48f1-8c44-f20050c229e3",
+                        email: $("#txt-e").val(),
+                        full_name:  $("#txt-n").val(),
                         result: a
                     };
 

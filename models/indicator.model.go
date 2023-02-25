@@ -26,3 +26,13 @@ func (i *Indicator) CreateIndicator(db *gorm.DB) (*Indicator, error) {
 	}
 	return i, nil
 }
+
+func (q *Indicator) GetAllIndicators(db *gorm.DB) (*[]Indicator, error) {
+	var err error
+	indicator := []Indicator{}
+	err = db.Debug().Limit(100).Find(&indicator).Error
+	if err != nil {
+		return &[]Indicator{}, err
+	}
+	return &indicator, err
+}
